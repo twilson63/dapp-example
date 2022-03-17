@@ -54,8 +54,8 @@
     tx.addTag("Type", "post");
     console.log(tx);
     try {
-      let result = await window.arweaveWallet.sign(tx);
-      await arweave.transactions.post("https://arweave.net/tx", tx);
+      await arweave.transactions.sign(tx);
+      await arweave.transactions.post(tx);
       console.log(`Tx ${result.id}`);
       showPost = false;
       alert("Successfully sent!");

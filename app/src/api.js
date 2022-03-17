@@ -1,4 +1,8 @@
-export const arweave = Arweave.init({});
+export const arweave = Arweave.init({
+  host: "arweave.net",
+  port: 443,
+  protocol: "https",
+});
 
 export const createPostInfo = (node) => {
   const ownerAddress = node.owner.address;
@@ -11,7 +15,7 @@ export const createPostInfo = (node) => {
     length: node.data.size,
     timestamp: timestamp,
   }
-  postInfo.request = arweave.api.get(`https://arweave.net/${node.id}`, { timeout: 10000 })
+  postInfo.request = arweave.api.get(`/${node.id}`, { timeout: 10000 })
    .then(x => x.data)
    .catch(() => { postInfo.error = "timeout loading data"});
   return postInfo;
