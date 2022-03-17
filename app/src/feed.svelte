@@ -1,6 +1,4 @@
 <script>
-  //import { ArweaveWebWallet } from "arweave-wallet-connector";
-
   import { buildQuery, arweave, createPostInfo } from "./api.js";
   import { take, takeLast } from "ramda";
   import formatDistance from "date-fns/formatDistance";
@@ -8,26 +6,21 @@
 
   let showPost = false;
   let connected = false;
-  // const webWallet = new ArweaveWebWallet(
-  //   {
-  //     name: "TownSquare",
-  //     logo: "https://jfbeats.github.io/ArweaveWalletConnector/placeholder.svg",
-  //   },
-  //   "arweave.app"
-  // );
 
   async function connect() {
-    await webWallet.connect();
-    webWallet.on("change", () => {
-      if (!webWallet.address && connected) {
-        connected = false;
-      } else {
-        connected = true;
-      }
+    if (!window.arweaveWallet) {
+      return alert("ArConnect is not installed!");
+    }
+    await window.arweaveWallet.connect(["ACCESS_ADDRESS", "SIGN_TRANSACTION"], {
+      name: "PublicSquare",
     });
+    connected = true;
   }
 
-  function disconnect() {}
+  async function disconnect() {
+    await window.arweaveWallet.disconnect();
+    connected = false;
+  }
 
   function togglePost() {
     showPost = !showPost;
@@ -51,6 +44,26 @@
     //console.log(edges);
     return edges.map((edge) => createPostInfo(edge.node));
   }
+
+  async function createPost(e) {
+    // createTransaction
+    const tx = await arweave.createTransaction({ data: e.detail.text });
+    tx.addTag("App-Name", "PublicSquare");
+    tx.addTag("Content-Type", "text/plain");
+    tx.addTag("Version", "1.0.1");
+    tx.addTag("Type", "post");
+    console.log(tx);
+    try {
+      let result = await window.arweaveWallet.sign(tx);
+      await arweave.transactions.post("https://arweave.net/tx", tx);
+      console.log(`Tx ${result.id}`);
+      showPost = false;
+      alert("Successfully sent!");
+    } catch (e) {
+      console.log(e);
+      alert("ERROR: " + e.message);
+    }
+  }
 </script>
 
 <header class="navbar bg-base-100">
@@ -71,7 +84,7 @@
 <main class="hero min-h-screen bg-base-200">
   <div class="hero-content flex-col">
     {#if showPost}
-      <Post />
+      <Post on:submit={createPost} />
     {/if}
     {#await getPostInfos()}
       <svg
