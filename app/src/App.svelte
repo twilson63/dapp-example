@@ -1,30 +1,56 @@
 <script>
-	export let name;
+	import { buildQuery, arweave, createPostInfo } from "./api.js";
+
+	async function getPostInfos() {
+		const query = buildQuery();
+
+		const res = await fetch("https://arweave.net/graphql", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify(query),
+		});
+		// const results = await arweave.api.post("/graphql", query).catch((err) => {
+		// 	console.error("GraphQL query failed");
+		// 	throw new Error(err);
+		// });
+		const results = await res.json();
+		const edges = results.data.transactions.edges;
+		//console.log(edges);
+		return edges.map((edge) => createPostInfo(edge.node));
+	}
 </script>
 
-<main>
-	<h1>Hello {name}!</h1>
-	<p>Visit the <a href="https://svelte.dev/tutorial">Svelte tutorial</a> to learn how to build Svelte apps.</p>
-</main>
+<h1>Arweave Example</h1>
 
-<style>
-	main {
-		text-align: center;
-		padding: 1em;
-		max-width: 240px;
-		margin: 0 auto;
-	}
-
-	h1 {
-		color: #ff3e00;
-		text-transform: uppercase;
-		font-size: 4em;
-		font-weight: 100;
-	}
-
-	@media (min-width: 640px) {
-		main {
-			max-width: none;
-		}
-	}
-</style>
+{#await getPostInfos()}
+	<svg
+		class="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+		xmlns="http://www.w3.org/2000/svg"
+		fill="none"
+		viewBox="0 0 24 24"
+	>
+		<circle
+			class="opacity-25"
+			cx="12"
+			cy="12"
+			r="10"
+			stroke="currentColor"
+			stroke-width="4"
+		/>
+		<path
+			class="opacity-75"
+			fill="currentColor"
+			d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+		/>
+	</svg>
+{:then nodes}
+	{#each nodes as node}
+		<div>
+			{#await node.request then text}
+				<div>{text}</div>
+			{/await}
+		</div>
+	{/each}
+{/await}
