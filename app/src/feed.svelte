@@ -21,7 +21,7 @@
 </script>
 
 <Navbar
-  title="Town Square"
+  title="ARWeave Social"
   {connected}
   on:toggle={() => (showPost = !showPost)}
   on:connect={() => dispatch("connect")}
@@ -41,6 +41,13 @@
       {#each nodes as node}
         <Card {node} />
       {/each}
+      <div class="card w-full bg-base-100 shadow-xl">
+        <div class="card-actions justify-center">
+          <button on:click={() => dispatch("more")} class="btn btn-ghost"
+            >Load More</button
+          >
+        </div>
+      </div>
     {/await}
   </div>
 </main>

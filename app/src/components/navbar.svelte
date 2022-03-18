@@ -4,6 +4,8 @@
   export let title = "Town Square";
   const dispatch = createEventDispatcher();
 
+  let address = localStorage.getItem("address");
+
   function togglePost() {
     dispatch("toggle");
   }
@@ -24,6 +26,15 @@
   <div class="flex-none">
     <ul class="menu menu-horizontal p-0">
       {#if connected}
+        {#if address}
+          <li>
+            <a
+              href="/owners/{address}"
+              class="btn btn-ghost"
+              on:click={togglePost}>My Posts</a
+            >
+          </li>
+        {/if}
         <li>
           <button class="btn btn-ghost" on:click={togglePost}>Post</button>
         </li>

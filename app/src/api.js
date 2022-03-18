@@ -1,4 +1,6 @@
-import { find, propEq, prop } from 'ramda'
+import { concat, find, propEq, prop, last } from 'ramda'
+
+let cursor = null
 
 export const arweave = Arweave.init({
   host: "arweave.net",
@@ -9,7 +11,7 @@ export const arweave = Arweave.init({
 export const createPostInfo = (node) => {
   const ownerAddress = node.owner.address;
   const height = node.block ? node.block.height : -1;
-  const timestamp = node.block ? parseInt(node.block.timestamp, 10) * 1000 : -1;
+  const timestamp = node.block ? parseInt(node.block.timestamp, 10) * 1000 : new Date();
   const postInfo = {
     txid: node.id,
     owner: ownerAddress,
@@ -24,7 +26,7 @@ export const createPostInfo = (node) => {
   return postInfo;
  }
 
-export const buildQuery = ({count, address, topic}) => {
+export const buildQuery = ({count, address, topic, after}) => {
   
   count = Math.min(100, count || 100)
   let ownersFilter = '';
@@ -38,15 +40,20 @@ export const buildQuery = ({count, address, topic}) => {
       values: ["${topic}"]
     },`
   }
+  let afterFilter = '';
+  if (after) {
+    afterFilter = `after: "${after}",`
+  }
   const queryObject = {
     query: `{
-      transactions(first: ${count}, ${ownersFilter} 
+      transactions(first: ${count}, ${afterFilter} ${ownersFilter} 
         tags: [
           { name: "App-Name", values: ["PublicSquare"]},
           { name: "Content-Type", values: ["text/plain"]},
           ${topicFilter}
         ]) {
         edges {
+          cursor
           node {
             id
             owner {
@@ -109,12 +116,12 @@ export async function getPostInfos(topic) {
   // });
   const results = await res.json();
   const edges = results.data.transactions.edges;
-  //console.log(edges);
+  cursor = last(edges).cursor
   return edges.map((edge) => createPostInfo(edge.node));
 }
 
-export async function getPostByOwner(owner) {
-  const query = buildQuery({owner});
+export async function getPostByOwner(address) {
+  const query = buildQuery({address});
 
   const res = await fetch("https://arweave.net/graphql", {
     method: "POST",
@@ -129,6 +136,21 @@ export async function getPostByOwner(owner) {
   // });
   const results = await res.json();
   const edges = results.data.transactions.edges;
-  //console.log(edges);
+  cursor = last(edges).cursor
   return edges.map((edge) => createPostInfo(edge.node));
+}
+
+export async function more(posts) {
+  console.log(cursor)
+  if (!cursor) {
+    alert('no more posts available') 
+    return posts
+  }
+  const query = buildQuery({after: cursor}) 
+  const { data } = await arweave.api.post('/graphql', query).catch(_e => ({ data: { transactions: {edges: []}}}))
+  
+  const edges = data.data.transactions.edges;
+  cursor = last(edges) ? last(edges).cursor : null
+  //return concat(posts, edges.map(e => createPostInfo(e.node)))
+  return [...posts, ...edges.map(e => createPostInfo(e.node))]
 }

@@ -5,6 +5,7 @@
 		waitForNewPosts,
 		getPostInfos,
 		getPostByOwner,
+		more,
 	} from "./api.js";
 
 	import Feed from "./feed.svelte";
@@ -82,6 +83,7 @@
 		on:createPost={createPost}
 		on:connect={connect}
 		on:disconnect={disconnect}
+		on:more={async () => (posts = more(await posts))}
 	/>
 </Route>
 <Route path="/topics/:topic" let:meta>

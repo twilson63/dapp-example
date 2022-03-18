@@ -9,6 +9,7 @@ serve((req) => {
   const routes = {
     "/": serveStatic("./app/public/index.html", "text/html"),
     "/favicon.png": serveStatic("./app/public/favicon.png", "image/png"),
+    "/tailwind.css": serveStatic("./app/public/tailwind.css", "text/css"),
     "/build/bundle.css": serveStatic(
       "./app/public/build/bundle.css",
       "text/css",

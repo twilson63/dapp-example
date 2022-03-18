@@ -21,7 +21,7 @@
 </script>
 
 <Navbar
-  title="Town Square - Owner"
+  title="ARWeave Social - Owner"
   {connected}
   on:toggle={() => (showPost = !showPost)}
   on:connect={() => dispatch("connect")}
