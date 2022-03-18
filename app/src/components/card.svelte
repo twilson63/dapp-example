@@ -10,11 +10,18 @@
     <h2 class="card-title">
       {take(5, node.owner) + "..." + takeLast(5, node.owner)}
     </h2>
-    <p>
-      {#await node.request then text}
-        <div>{text}</div>
-      {/await}
-    </p>
+
+    {#await node.request then text}
+      <p>
+        {text}
+      </p>
+    {/await}
+    {#if node.topic}
+      <div class="mt-4">
+        <a href="/topics/{node.topic}" class="text-blue-200">#{node.topic}</a>
+      </div>
+    {/if}
+
     <div class="card-actions justify-end">
       <div>{formatDistance(node.timestamp, new Date())}</div>
     </div>

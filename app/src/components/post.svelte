@@ -3,9 +3,12 @@
   const dispatch = createEventDispatcher();
 
   let text = "";
+  let topic = "";
+
   function createPost(e) {
-    dispatch("submit", { text });
+    dispatch("submit", { text, topic });
     text = "";
+    topic = "";
   }
 </script>
 
@@ -18,6 +21,16 @@
         class="textarea textarea-bordered"
         placeholder="Enter post here."
       />
+      <div class="form-control w-full max-w-xs">
+        <label class="label" for="topic">Topic</label>
+        <input
+          id="topic"
+          type="text"
+          class="input input-bordered w-full max-w-xs"
+          placeholder="Enter a topic..."
+          bind:value={topic}
+        />
+      </div>
       <div class="card-actions justify-end">
         <button type="submit" class="btn btn-primary">Submit</button>
       </div>

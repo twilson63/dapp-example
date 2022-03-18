@@ -3,6 +3,7 @@
 	import { arweave, waitForNewPosts, getPostInfos } from "./api.js";
 
 	import Feed from "./feed.svelte";
+	import Topics from "./topics.svelte";
 
 	let connected = false;
 	let showPost = false;
@@ -30,15 +31,19 @@
 
 	async function createPost(e) {
 		const data = e.detail.text;
+		const topic = e.detail.topic;
 		// createTransaction
 		const tx = await arweave.createTransaction({ data });
 		tx.addTag("App-Name", "PublicSquare");
 		tx.addTag("Content-Type", "text/plain");
 		tx.addTag("Version", "1.0.1");
 		tx.addTag("Type", "post");
+		// if topic supplied then add to tx
+		if (topic.length > 0) {
+			tx.addTag("Topic", topic);
+		}
 
 		try {
-			showPost = false;
 			showNotify = true;
 			await arweave.transactions.sign(tx);
 			await arweave.transactions.post(tx);
@@ -71,4 +76,7 @@
 		on:connect={connect}
 		on:disconnect={disconnect}
 	/>
+</Route>
+<Route path="/topics/:topic" let:meta>
+	<Topics posts={getPostInfos(meta.params.topic)} />
 </Route>

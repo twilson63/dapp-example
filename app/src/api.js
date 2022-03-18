@@ -1,3 +1,5 @@
+import { find, propEq, prop } from 'ramda'
+
 export const arweave = Arweave.init({
   host: "arweave.net",
   port: 443,
@@ -15,19 +17,35 @@ export const createPostInfo = (node) => {
     length: node.data.size,
     timestamp: timestamp,
   }
+  postInfo.topic = node.tags && prop('value', find(propEq('name', 'Topic'), node.tags))
   postInfo.request = arweave.api.get(`/${node.id}`, { timeout: 10000 })
    .then(x => x.data)
    .catch(() => { postInfo.error = "timeout loading data"});
   return postInfo;
  }
 
-export const buildQuery = () => {
+export const buildQuery = ({count, address, topic}) => {
+  
+  count = Math.min(100, count || 100)
+  let ownersFilter = '';
+  if (address) {
+    ownersFilter = `owners: ["${address}"],`
+  }
+  let topicFilter = ''
+  if (topic) {
+    topicFilter = `{
+      name: "Topic",
+      values: ["${topic}"]
+    },`
+  }
   const queryObject = {
     query: `{
-      transactions(first: 100, tags: [
-        { name: "App-Name", values: ["PublicSquare"]},
-        { name: "Content-Type", values: ["text/plain"]}
-      ]) {
+      transactions(first: ${count}, ${ownersFilter} 
+        tags: [
+          { name: "App-Name", values: ["PublicSquare"]},
+          { name: "Content-Type", values: ["text/plain"]},
+          ${topicFilter}
+        ]) {
         edges {
           node {
             id
@@ -75,8 +93,8 @@ export async function waitForNewPosts(txid) {
   return posts;
 }
 
-export async function getPostInfos() {
-  const query = buildQuery();
+export async function getPostInfos(topic) {
+  const query = buildQuery({topic});
 
   const res = await fetch("https://arweave.net/graphql", {
     method: "POST",
