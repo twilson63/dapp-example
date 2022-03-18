@@ -52,3 +52,45 @@ export const buildQuery = () => {
   }
   return queryObject;
 }
+
+function delay(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+export async function waitForNewPosts(txid) {
+  let count = 0;
+  let foundPost = null;
+  let posts = [];
+
+  while (!foundPost) {
+    count += 1;
+    console.log(`attempt ${count}`);
+    await delay(2000 * count);
+    posts = await getPostInfos();
+    foundPost = posts.find((p) => p.txid === txid);
+  }
+
+  let i = posts.indexOf(foundPost);
+  posts.unshift(posts.splice(i, 1)[0]);
+  return posts;
+}
+
+export async function getPostInfos() {
+  const query = buildQuery();
+
+  const res = await fetch("https://arweave.net/graphql", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(query),
+  });
+  // const results = await arweave.api.post("/graphql", query).catch((err) => {
+  // 	console.error("GraphQL query failed");
+  // 	throw new Error(err);
+  // });
+  const results = await res.json();
+  const edges = results.data.transactions.edges;
+  //console.log(edges);
+  return edges.map((edge) => createPostInfo(edge.node));
+}
