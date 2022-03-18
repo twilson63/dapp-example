@@ -1,4 +1,4 @@
-import { concat, find, propEq, prop, last } from 'ramda'
+import { find, propEq, prop, last } from 'ramda'
 
 let cursor = null
 

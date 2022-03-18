@@ -8,7 +8,7 @@ import { graphql } from "./api.js";
 serve((req) => {
   const routes = {
     "/": serveStatic("./app/public/index.html", "text/html"),
-    "/favicon.png": serveStatic("./app/public/favicon.png", "image/png"),
+    "/social.svg": serveStatic("./app/public/social.svg", "image/svg+xml"),
     "/tailwind.css": serveStatic("./app/public/tailwind.css", "text/css"),
     "/build/bundle.css": serveStatic(
       "./app/public/build/bundle.css",
