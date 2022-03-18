@@ -112,3 +112,23 @@ export async function getPostInfos(topic) {
   //console.log(edges);
   return edges.map((edge) => createPostInfo(edge.node));
 }
+
+export async function getPostByOwner(owner) {
+  const query = buildQuery({owner});
+
+  const res = await fetch("https://arweave.net/graphql", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(query),
+  });
+  // const results = await arweave.api.post("/graphql", query).catch((err) => {
+  // 	console.error("GraphQL query failed");
+  // 	throw new Error(err);
+  // });
+  const results = await res.json();
+  const edges = results.data.transactions.edges;
+  //console.log(edges);
+  return edges.map((edge) => createPostInfo(edge.node));
+}

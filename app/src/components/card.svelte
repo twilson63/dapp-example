@@ -8,7 +8,9 @@
 <div class="card w-full bg-base-100 shadow-xl">
   <div class="card-body">
     <h2 class="card-title">
-      {take(5, node.owner) + "..." + takeLast(5, node.owner)}
+      <a class="text-blue-200" href="/owners/{node.owner}"
+        >{take(5, node.owner) + "..." + takeLast(5, node.owner)}</a
+      >
     </h2>
 
     {#await node.request then text}

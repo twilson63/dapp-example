@@ -21,6 +21,7 @@
 </script>
 
 <Navbar
+  title="Town Square"
   {connected}
   on:toggle={() => (showPost = !showPost)}
   on:connect={() => dispatch("connect")}

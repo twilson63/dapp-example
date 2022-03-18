@@ -1,14 +1,20 @@
 <script>
 	import { Route } from "tinro";
-	import { arweave, waitForNewPosts, getPostInfos } from "./api.js";
+	import {
+		arweave,
+		waitForNewPosts,
+		getPostInfos,
+		getPostByOwner,
+	} from "./api.js";
 
 	import Feed from "./feed.svelte";
 	import Topics from "./topics.svelte";
+	import User from "./user.svelte";
 
 	let connected = false;
 	let showPost = false;
 	let showNotify = false;
-
+	let address = "";
 	let posts = getPostInfos();
 
 	async function connect() {
@@ -18,7 +24,7 @@
 		await window.arweaveWallet.connect(["ACCESS_ADDRESS", "SIGN_TRANSACTION"], {
 			name: "PublicSquare",
 		});
-		const address = await arweaveWallet.getActiveAddress();
+		address = await arweaveWallet.getActiveAddress();
 		window.localStorage.setItem("address", address);
 		connected = true;
 	}
@@ -61,6 +67,7 @@
 			window.arweaveWallet.connect(["ACCESS_ADDRESS", "SIGN_TRANSACTION"], {
 				name: "PublicSquare",
 			});
+			address = localStorage.getItem("address");
 			connected = true;
 		}
 	}, 500);
@@ -78,5 +85,24 @@
 	/>
 </Route>
 <Route path="/topics/:topic" let:meta>
-	<Topics posts={getPostInfos(meta.params.topic)} />
+	<Topics
+		{connected}
+		{showNotify}
+		{showPost}
+		on:createPost={createPost}
+		on:connect={connect}
+		on:disconnect={disconnect}
+		posts={getPostInfos(meta.params.topic)}
+	/>
+</Route>
+<Route path="/owners/:owner" let:meta>
+	<User
+		{connected}
+		{showNotify}
+		{showPost}
+		on:createPost={createPost}
+		on:connect={connect}
+		on:disconnect={disconnect}
+		posts={getPostByOwner(meta.params.owner)}
+	/>
 </Route>
