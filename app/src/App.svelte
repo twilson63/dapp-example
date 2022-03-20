@@ -1,5 +1,6 @@
 <script>
-	import { Route } from "tinro";
+	import { Route, router } from "tinro";
+
 	import {
 		arweave,
 		waitForNewPosts,
@@ -11,6 +12,8 @@
 	import Feed from "./feed.svelte";
 	import Topics from "./topics.svelte";
 	import User from "./user.svelte";
+
+	router.mode.hash();
 
 	let connected = false;
 	let showPost = false;
